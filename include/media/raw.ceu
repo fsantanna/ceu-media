@@ -4,12 +4,14 @@
 native/const
     _LP_TYPE_EVENT_POINTER_CLICK,
     _LP_TYPE_EVENT_POINTER_MOVE,
+    _LP_TYPE_EVENT_KEY,
 ;
 
 native/plain
     _char_ptr_ext,
     _lp_EventPointerClick,
     _lp_EventPointerMove,
+    _lp_EventKey,
 ;
 
 native/pure
@@ -17,10 +19,12 @@ native/pure
     _G_OBJECT_TYPE,
     _LP_EVENT_POINTER_CLICK,
     _LP_EVENT_POINTER_MOVE,
+    _LP_EVENT_KEY,
     _LP_SCENE,
 ;
 
 native/nohold
+    _g_free,
     _g_object_get,
     _g_object_set,
     _g_object_unref,
@@ -75,7 +79,6 @@ native @nohold _LP_IS_MEDIA;
 native @nohold _LP_IS_SCENE;
 native @nohold _LP_MEDIA;
 native @nohold _LP_EVENT;
-native @nohold _LP_EVENT_KEY;
 native @nohold _LP_EVENT_ERROR;
 
 /***********  GLib functions  *************/

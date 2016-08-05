@@ -1,13 +1,23 @@
-#include "media.ceu"
+#if 0
+ceu --pre --pre-args="-I/data/ceu/ceu/include -I/data/ceu/ceu-libuv/include -I/data/ceu/ceu-media/include" --pre-input="src/hello-01.ceu" --ceu --env --env-header=/data/ceu/ceu/env/header.h --env-main=/data/ceu/ceu/env/main.c --env-output=/tmp/x.c --cc --cc-args="`pkg-config play --libs --cflags` -luv -llua5.3 -g" --cc-output=/tmp/x.exe
+#endif
+
+#include "c.ceu"
+#include "media/media.ceu"
 
 var int width = 1080;
 var int height = 720;
 
-var Scene s with
-  this.size = Size (width, height);
-  this.auto_advance = true;
-end;
+var& IScene scene;
+watching Scene(Size(width,height),true) => (scene) do
+    var f64 x, y;
+    var int but, press;
+    every (x,y,but,press) in scene.ok_mouse_clicked do
+        _printf("ok_mouse_clicked: %f %f %d %d\n", x,y,but,press);
+    end
+end
 
+#if 0
 var Media m1 = Media.VIDEO ("../../resources/animGar.mp4", 
         Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
 var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 
@@ -24,6 +34,7 @@ watching 30s do
       // after 10s, destroys everything and restarts
   end
 end
+#endif
 
-
+_printf("nooo\n");
 escape 0;

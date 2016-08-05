@@ -8,9 +8,10 @@ var& IScene scene;
 watching Scene(Size(width,height),true) => (scene) do
     par do
         var int x, y;
-        var int but, press;
-        every (x,y,but,press) in scene.ok_mouse_clicked do
-            _printf("CLICK: %d %d %d %d\n", x,y,but,press);
+        var int but;
+        var bool pressed;
+        every (x,y,but,pressed) in scene.ok_mouse_clicked do
+            _printf("CLICK: %d %d %d %d\n", x,y,but,pressed as int);
         end
     with
         var int x, y;

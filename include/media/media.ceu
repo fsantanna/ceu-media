@@ -62,8 +62,9 @@ end
 #endif
 
 data IScene with
-    event (int, int, int, int) ok_mouse_clicked;
-    event (int, int)           ok_mouse_moved;
+    event (int, int, int, bool)  ok_mouse_clicked;
+    event (int, int)             ok_mouse_moved;
+    event (_char_ptr_ext, bool)  ok_keyed;
 #if 0
     event (f64, f64) mouse_move_event;
     event (_char_ptr_ext, int) key_event;
@@ -82,7 +83,7 @@ code/await Scene (var Size? size, var bool auto_advance)
                     => (var& IScene scene)
                         => void
 do
-    var IScene scene_ = val IScene(_,_);
+    var IScene scene_ = val IScene(_,_,_);
     scene = &scene_;
 
     var int w=0, h=0;
@@ -125,6 +126,9 @@ do
                             until (_LP_SCENE(source) == ptr);
 
             var _GType type = _G_OBJECT_TYPE (evt);
+
+            /* MOUSE */
+
             if type == _LP_TYPE_EVENT_POINTER_CLICK then
                 var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
 
@@ -132,24 +136,44 @@ do
 //  - mudei os eventos internos p/ "int"
 
                 var f64 x=_, y=_;
-                var int button=_, press=_;
+                var int button=_, pressed=_;
                 _g_object_get(
                     _G_OBJECT(evt_),
                     "x", &&x,
                     "y", &&y,
                     "button", &&button,
-                    "press", &&press,
+                    "press", &&pressed,
                     null,
                 );
         
-                emit scene_.ok_mouse_clicked(x as int, y as int, button, press);
+                emit scene_.ok_mouse_clicked(x as int, y as int,
+                                             button, pressed as bool);
             else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
                 var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
 
                 var f64 x=_, y=_;
-                _g_object_get(_G_OBJECT(evt_), "x", &&x, "y", &&y, null);
+                _g_object_get(_G_OBJECT(evt_), "x",&&x, "y",&&y, null);
 
                 emit scene_.ok_mouse_moved(x as int, y as int);
+
+            /* KEY */
+
+            else/if type == _LP_TYPE_EVENT_KEY then
+                var _lp_EventKey&& evt_ = _LP_EVENT_KEY(evt);
+
+                var _char_ptr_ext key     = _;
+                var int           pressed = _;
+                _g_object_get(
+                    _G_OBJECT(evt_),
+                    "key",   &&key,
+                    "press", &&pressed,
+                    null
+                );
+                do finalize with
+                    _g_free (key);
+                end
+
+                emit scene_.ok_keyed(key, pressed as bool);
             end
         end
     end
@@ -163,23 +187,7 @@ do
                                           _LP_SCENE(source) == &&scene!);
       var _GType type = _G_OBJECT_TYPE (evt);
       if type == _LP_TYPE_EVENT_POINTER_CLICK then
-        var _lp_EventPointerClick &&evtPointerClick = 
-                                      _UNSAFE(_LP_EVENT_POINTER_CLICK (evt));
-        var f64 x = 0, y = 0;
-        var int button = 0, press = 0;
-        
-        _g_object_get (_G_OBJECT(evtPointerClick), "x", &&x, "y", &&y,
-                      "button", &&button, "press", &&press, null);
-        
-        emit ok_mouse_clicked => (x, y, button, press);
       else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
-        var _lp_EventPointerMove &&evtPointerMove = 
-                                      _UNSAFE(_LP_EVENT_POINTER_MOVE (evt));
-        var f64 x = 0, y = 0;
-        
-        _g_object_get (_G_OBJECT(evtPointerMove), "x", &&x, "y", &&y, null);
-        
-        emit mouse_move_event => (x, y);
       else/if type == _LP_TYPE_EVENT_KEY then
         var _lp_EventKey &&evtKey = _UNSAFE(_LP_EVENT_KEY(evt));
         var _charptr key = null;
