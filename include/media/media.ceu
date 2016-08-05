@@ -62,7 +62,8 @@ end
 #endif
 
 data IScene with
-    event (f64, f64, int, int) ok_mouse_clicked;
+    event (int, int, int, int) ok_mouse_clicked;
+    event (int, int)           ok_mouse_moved;
 #if 0
     event (f64, f64) mouse_move_event;
     event (_char_ptr_ext, int) key_event;
@@ -81,7 +82,7 @@ code/await Scene (var Size? size, var bool auto_advance)
                     => (var& IScene scene)
                         => void
 do
-    var IScene scene_ = val IScene(_);
+    var IScene scene_ = val IScene(_,_);
     scene = &scene_;
 
     var int w=0, h=0;
@@ -125,14 +126,15 @@ do
 
             var _GType type = _G_OBJECT_TYPE (evt);
             if type == _LP_TYPE_EVENT_POINTER_CLICK then
-                var _lp_EventPointerClick&& evtPointerClick = 
-                                      _LP_EVENT_POINTER_CLICK(evt);
+                var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
 
-// TODO: (x,y) sao floats?
+// TODO: (x,y) sao "float"?
+//  - mudei os eventos internos p/ "int"
+
                 var f64 x=_, y=_;
                 var int button=_, press=_;
                 _g_object_get(
-                    _G_OBJECT(evtPointerClick),
+                    _G_OBJECT(evt_),
                     "x", &&x,
                     "y", &&y,
                     "button", &&button,
@@ -140,7 +142,14 @@ do
                     null,
                 );
         
-                emit scene_.ok_mouse_clicked(x, y, button, press);
+                emit scene_.ok_mouse_clicked(x as int, y as int, button, press);
+            else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
+                var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
+
+                var f64 x=_, y=_;
+                _g_object_get(_G_OBJECT(evt_), "x", &&x, "y", &&y, null);
+
+                emit scene_.ok_mouse_moved(x as int, y as int);
             end
         end
     end
