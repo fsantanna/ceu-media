@@ -24,8 +24,7 @@ data Size with
 end
 
 data Media with
-    var _char_ptr_ext uri;
-    //vector[50] byte uri;
+    vector[100] byte uri;
 end
 
 data Media.Video with
@@ -248,8 +247,7 @@ do
     event void ok_;
     ok = &ok_;
 
-    //var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&media.uri[0])
-    var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, media.uri)
+    var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&media.uri[0])
         finalize (ptr) with
             // TODO: who destroys?
         end;
