@@ -1,0 +1,101 @@
+#ifndef _CEU_MEDIA_RAW
+#define _CEU_MEDIA_RAW
+
+native/const
+    _LP_TYPE_EVENT_POINTER_CLICK,
+;
+
+native/plain
+    _char_ptr_ext,
+    _lp_EventPointerClick,
+;
+
+native/pure
+    _G_OBJECT,
+    _G_OBJECT_TYPE,
+    _LP_EVENT_POINTER_CLICK,
+    _LP_SCENE,
+;
+
+native/nohold
+    _g_object_get,
+    _g_object_set,
+    _g_object_unref,
+    _lp_event_get_source,
+    _lp_scene_receive,
+;
+
+native
+    _GObject,
+    _GType,
+    _lp_Event,
+    _lp_scene_new,
+    _lp_Scene_ptr,
+;
+
+input (_GObject&&, _lp_Event&&) LP_EVENT;
+
+native/pre do
+    ##include <glib.h>
+    ##include <play.h>
+
+    typedef char*     char_ptr_ext;
+    typedef lp_Scene* lp_Scene_ptr;
+end
+
+#if 0
+input (int, char&& &&) OS_START;
+
+native/pre do
+  ##include <stdlib.h>
+  
+  ##define UNSAFE(x) x
+  ##define ELEM_N(V,N) V[N]
+  typedef char * charptr;
+end
+
+native @pure _UNSAFE;
+native @pure _ELEM_N();
+
+native @nohold _printf ();
+native @nohold _free ();
+
+/*********** LibPlay functions *************/
+native @nohold _lp_scene_new;
+native @nohold _lp_scene_advance;
+native @nohold _lp_media_new;
+native @nohold _lp_media_start;
+native @nohold _lp_media_stop;
+native @nohold _lp_media_abort;
+native @nohold _lp_event_to_string;
+native @nohold _LP_IS_MEDIA;
+native @nohold _LP_IS_SCENE;
+native @nohold _LP_MEDIA;
+native @nohold _LP_EVENT;
+native @nohold _LP_EVENT_POINTER_MOVE;
+native @nohold _LP_EVENT_KEY;
+native @nohold _LP_EVENT_ERROR;
+
+/***********  GLib functions  *************/
+native @nohold _g_list_free;
+
+/***********    async block   *************/
+spawn do
+  async do 
+    var s64 base, current, tmp;
+    base = _g_get_monotonic_time ();
+    current = 0;
+    tmp = 0;
+    loop do
+      current = _g_get_monotonic_time ();
+      tmp = current - base;
+      
+      base = current;
+      emit (tmp)us;
+    end
+  end
+  await FOREVER;
+end
+#endif
+
+#endif
