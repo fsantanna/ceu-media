@@ -10,21 +10,21 @@ var int height = 720;
 
 var& IScene scene;
 watching Scene(Size(width,height),true) => (scene) do
+    vector[] byte uri = [] .. "resources/animGar.mp4";
+
     var Media.Video m1 = val Media.Video (
-                            _, // TODO: vector constructor
+                            &uri,
                             Region(0, 0, 1, width/2, height/2),
                             1.0,
                             1.0,
                          );
-    m1.uri = [] .. "resources/animGar.mp4";
 
     var Media.Video m2 = val Media.Video (
-                            _, // TODO: vector constructor
+                            &uri,
                             Region(width/2, height/2, 1, width/2, height/2),
                             1.0,
                             0
                          );
-    m2.uri = [] .. "resources/animGar.mp4";
 
     watching 30s do
         loop do

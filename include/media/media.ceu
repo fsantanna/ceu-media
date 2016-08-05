@@ -24,7 +24,7 @@ data Size with
 end
 
 data Media with
-    vector[100] byte uri;
+    vector&[] byte uri;
 end
 
 data Media.Video with
