@@ -10,16 +10,19 @@ var int height = 720;
 
 var& IScene scene;
 watching Scene(Size(width,height),true) => (scene) do
-    var f64 x, y;
-    var int but, press;
-    every (x,y,but,press) in scene.ok_mouse_clicked do
-        _printf("ok_mouse_clicked: %f %f %d %d\n", x,y,but,press);
-    end
+    var Media.Video m1 = val Media.Video (
+                            "resources/animGar.mp4",
+                            //_, // TODO: vector constructor
+                            Region(0, 0, 1, width/2, height/2),
+                            1.0,
+                            1.0,
+                         );
+    //m1.uri = [] .. "../../resources/animGar.mp4";
+
+    await Play(&scene, &m1);
 end
 
 #if 0
-var Media m1 = Media.VIDEO ("../../resources/animGar.mp4", 
-        Region (0, 0, width/2, height/2), 1, 1.0, 1.0);
 var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 
         Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
 
@@ -36,5 +39,4 @@ watching 30s do
 end
 #endif
 
-_printf("nooo\n");
 escape 0;
