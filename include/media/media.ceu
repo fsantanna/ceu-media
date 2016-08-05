@@ -1,6 +1,7 @@
 #ifndef _CEU_MEDIA_MEDIA
 #define _CEU_MEDIA_MEDIA
 
+#include "uv/uv.ceu"
 #include "media/raw.ceu"
 
 #define MEDIA_FRAME_RATE 2    // 1 fps
@@ -23,7 +24,8 @@ data Size with
 end
 
 data Media with
-    vector[] byte uri;
+    var _char_ptr_ext uri;
+    //vector[50] byte uri;
 end
 
 data Media.Video with
@@ -62,6 +64,7 @@ end
 #endif
 
 data IScene with
+    var&  _lp_Scene_ptr          ptr;
     event (int, int, int, bool)  ok_mouse_clicked;
     event (int, int)             ok_mouse_moved;
     event (_char_ptr_ext, bool)  ok_keyed;
@@ -83,9 +86,6 @@ code/await Scene (var Size? size, var bool auto_advance)
                     => (var& IScene scene)
                         => void
 do
-    var IScene scene_ = val IScene(_,_,_);
-    scene = &scene_;
-
     var int w=0, h=0;
     if size? then
         w = size!.width;
@@ -98,6 +98,10 @@ do
         end;
 
     var& _lp_Scene_ptr ptr = &ptr_!;
+
+    var IScene scene_ = val IScene(&ptr_!,_,_,_);
+    scene = &scene_;
+
     _g_object_set (ptr, "slave-audio", true, null);
     _g_object_set (ptr, "lockstep",    true, null);
 
@@ -105,9 +109,7 @@ do
         async (ptr) do
             loop do 
                 var _lp_Event &&evt;
-//_printf("1\n");
                 evt = _lp_scene_receive (ptr, false); 
-//_printf("2\n");
                 if evt != null then
                     emit LP_EVENT(_lp_event_get_source(evt), evt);
                 end
@@ -119,11 +121,18 @@ do
     par/or do
         await FOREVER;
     with
+        if auto_advance == true then 
+            every FREQ ms do
+                _lp_scene_advance(ptr, FREQ * NS);
+            end
+        else
+            await FOREVER;
+        end
+    with
         loop do
             var _GObject&&  source;
             var _lp_Event&& evt;
-            (source, evt) = await LP_EVENT
-                            until (_LP_SCENE(source) == ptr);
+            (source, evt) = await LP_EVENT until (_LP_SCENE(source) == ptr);
 
             var _GType type = _G_OBJECT_TYPE (evt);
 
@@ -189,16 +198,6 @@ do
       if type == _LP_TYPE_EVENT_POINTER_CLICK then
       else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
       else/if type == _LP_TYPE_EVENT_KEY then
-        var _lp_EventKey &&evtKey = _UNSAFE(_LP_EVENT_KEY(evt));
-        var _charptr key = null;
-        var int press = 0;
-        _g_object_get (_G_OBJECT(evtKey), "key", &&key, 
-                                          "press", &&press, null);
-        emit key_event => (key, press);
-
-        finalize with
-          _g_free (key);
-        end
       else/if type == _LP_TYPE_EVENT_ERROR then
         var _lp_EventError &&evtError = _UNSAFE(_LP_EVENT_ERROR(evt));
         var _GError &&err = null;
@@ -240,6 +239,69 @@ do
 #endif
     await FOREVER;
 
+end
+
+code/await Play (var& IScene scene, var& Media.Video media)
+                    => (event& void ok)
+                        => void
+do
+    event void ok_;
+    ok = &ok_;
+
+    //var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&media.uri[0])
+    var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, media.uri)
+        finalize (ptr) with
+            // TODO: who destroys?
+        end;
+
+    _g_object_set (
+        _G_OBJECT(ptr!),
+        "x",      media.region.x,
+        "y",      media.region.y,
+        "z",      media.region.z,
+        "width",  media.region.width,
+        "height", media.region.height,
+        "alpha",  media.alpha,
+        "volume", media.volume,
+        null
+    );
+
+    do
+        _lp_media_start(ptr!);
+    finalize (ptr) with
+        _lp_media_stop(ptr!);
+    end
+
+    loop do
+        var _GObject&&  source;
+        var _lp_Event&& evt;
+        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == ptr!);
+
+        var _GType type = _G_OBJECT_TYPE(evt);
+        if type == _LP_TYPE_EVENT_START then
+            emit ok_;
+        else/if type == _LP_TYPE_EVENT_STOP then
+            break;
+        end
+    end
+
+#if 0
+  if media.VIDEO then
+  else/if media.IMAGE then
+    _g_object_set (_G_OBJECT(&&m!), "x", media.IMAGE.region.x, "y", media.IMAGE.region.y,
+                  "width", media.IMAGE.region.width, "height", media.IMAGE.region.height,
+                  "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
+  else/if media.AUDIO then
+    _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
+  else/if media.TEXT then
+    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
+                  "font-desc", media.TEXT.font_desc, 
+                  "text-color", media.TEXT.color,
+                  "x", media.TEXT.region.x, "y", media.TEXT.region.y,
+                  "width", media.TEXT.region.width, "height", media.TEXT.region.height,
+                  "z", media.TEXT.z,  null);
+  end
+#endif
 end
 
 #if 0
