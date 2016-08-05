@@ -19,24 +19,27 @@ watching Scene(Size(width,height),true) => (scene) do
                          );
     //m1.uri = [] .. "../../resources/animGar.mp4";
 
-    await Play(&scene, &m1);
+    var Media.Video m2 = val Media.Video (
+                            "resources/animGar.mp4",
+                            Region(width/2, height/2, 1, width/2, height/2),
+                            1.0,
+                            0
+                         );
+
+    watching 30s do
+        loop do
+            _printf("===> RESTART\n");
+            watching 10s do
+                spawn Play(&scene, &m1);
+                spawn Play(&scene, &m2);
+                await FOREVER;
+            end
+            // after 10s, destroys everything and restarts
+        end
+    end
 end
 
 #if 0
-var Media m2 = Media.VIDEO ("../../resources/animGar.mp4", 
-        Region (width/2, height/2, width/2, height/2), 1, 1.0, 0);
-
-watching 30s do
-  loop do
-      _printf("===> RESTART\n");
-      watching 10s do
-          var Player p1 = Player.play (m1, &s);
-          var Player p2 = Player.play (m2, &s);
-          await FOREVER;
-      end
-      // after 10s, destroys everything and restarts
-  end
-end
 #endif
 
 escape 0;
