@@ -1,6 +1,7 @@
 #ifndef _CEU_MEDIA_MEDIA
 #define _CEU_MEDIA_MEDIA
 
+#include "c.ceu"
 #include "uv/uv.ceu"
 #include "media/raw.ceu"
 
@@ -29,8 +30,14 @@ end
 
 data Media.Video with
     var Region region;
-    var float alpha;
-    var float volume;
+    var float  alpha;
+    var float  volume;
+end
+
+data Media.Text with
+    vector&[] byte   font;
+    var       Region region;
+    var       uint   color;
 end
 
 #if 0
@@ -52,13 +59,6 @@ end
 
   or
 
-  tag TEXT with
-    var _char[255] uri; 
-    var _char[255] font_desc;
-    var uint color;
-    var Region region;
-    var int z;
-  end
 end
 #endif
 
@@ -194,9 +194,6 @@ do
       (source, evt) = await LP_EVENT until (_LP_IS_SCENE(source) and 
                                           _LP_SCENE(source) == &&scene!);
       var _GType type = _G_OBJECT_TYPE (evt);
-      if type == _LP_TYPE_EVENT_POINTER_CLICK then
-      else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
-      else/if type == _LP_TYPE_EVENT_KEY then
       else/if type == _LP_TYPE_EVENT_ERROR then
         var _lp_EventError &&evtError = _UNSAFE(_LP_EVENT_ERROR(evt));
         var _GError &&err = null;
@@ -211,14 +208,6 @@ do
           _g_free (msg);
         end
       end
-    end
-  with
-    if auto_advance == true then 
-      every FREQ ms do
-        _lp_scene_advance (&&scene!, FREQ * NS);
-      end
-    else
-      await FOREVER;
     end
   with
     await quit;
@@ -240,48 +229,110 @@ do
 
 end
 
-code/await Play (var& IScene scene, var& Media.Video media)
-                    => (event& void ok)
+data IPlay with
+    event void          ok;
+    var&  _lp_Media_ptr ptr;
+end
+
+code/tight/dynamic Play_Set_Properties (var& IPlay play,
+                                        dynamic var& Media media)
+                                            => void
+do
+    _ceu_dbg_assert(0);
+end
+code/tight/dynamic Play_Set_Properties (var& IPlay play,
+                                        dynamic var& Media.Video video)
+                                            => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "x",      video.region.x,
+        "y",      video.region.y,
+        "z",      video.region.z,
+        "width",  video.region.width,
+        "height", video.region.height,
+        "alpha",  video.alpha,
+        "volume", video.volume,
+        null
+    );
+end
+code/tight/dynamic Play_Set_Properties (var& IPlay play,
+                                        dynamic var& Media.Text text)
+                                            => void
+do
+_printf(">>> TEXT %s %s\n", &&text.uri[0], &&text.font[0]);
+_printf(">>> TEXT %d %d %d\n", text.region.x, text.region.y, text.region.z);
+_printf(">>> TEXT %d %d\n", text.region.width, text.region.height);
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "text",       &&text.uri[0],
+        "text-font",  &&text.font[0],
+        "text-color", text.color,
+        "x",          text.region.x,
+        "y",          text.region.y,
+        "z",          text.region.z,
+        "width",      text.region.width,
+        "height",     text.region.height,
+        null
+    );
+end
+
+code/tight Play_Set_Property_Char (var& IPlay play, var& Media.Text text,
+                                   var _char&& name, var _char&& value)
+                                    => void
+do
+    _g_object_set(play.ptr, name, value, null);
+end
+
+code/await Play (var& IScene scene, var& Media media)
+                    => (var& IPlay play)
                         => void
 do
-    event void ok_;
-    ok = &ok_;
-
     var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&media.uri[0])
         finalize (ptr) with
             // TODO: who destroys?
         end;
 
-    _g_object_set (
-        _G_OBJECT(ptr!),
-        "x",      media.region.x,
-        "y",      media.region.y,
-        "z",      media.region.z,
-        "width",  media.region.width,
-        "height", media.region.height,
-        "alpha",  media.alpha,
-        "volume", media.volume,
-        null
-    );
+    var IPlay play_ = val IPlay(_, &ptr!);
+    play = &play_;
+
+    call/dynamic Play_Set_Properties(&play_, &media);
 
     do
-        _lp_media_start(ptr!);
-    finalize (ptr) with
-        _lp_media_stop(ptr!);
+        _lp_media_start(play_.ptr);
+    finalize (play_.ptr) with
+        _lp_media_stop(play_.ptr);
     end
 
     loop do
         var _GObject&&  source;
         var _lp_Event&& evt;
-        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == ptr!);
+        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == play_.ptr);
 
         var _GType type = _G_OBJECT_TYPE(evt);
         if type == _LP_TYPE_EVENT_START then
-            emit ok_;
+            emit play_.ok;
         else/if type == _LP_TYPE_EVENT_STOP then
             break;
         end
     end
+end
+
+#if 0
+code/await/dynamic Play (var& IScene scene, var& Media.Video video)
+                    => (var& IPlay play)
+                        => void
+do
+    var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&video.uri[0])
+        finalize (ptr) with
+            // TODO: who destroys?
+        end;
+
+    var IPlay play_ = val IPlay(_, &ptr!);
+    play = &play_;
+
+end
+#endif
 
 #if 0
   if media.VIDEO then
@@ -292,17 +343,8 @@ do
   else/if media.AUDIO then
     _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
   else/if media.TEXT then
-    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
-                  "font-desc", media.TEXT.font_desc, 
-                  "text-color", media.TEXT.color,
-                  "x", media.TEXT.region.x, "y", media.TEXT.region.y,
-                  "width", media.TEXT.region.width, "height", media.TEXT.region.height,
-                  "z", media.TEXT.z,  null);
   end
-#endif
-end
 
-#if 0
 class Player with
   var Scene   &scene;
   var Media   media;

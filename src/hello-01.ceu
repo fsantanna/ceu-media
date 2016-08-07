@@ -13,18 +13,18 @@ watching Scene(Size(width,height),true) => (scene) do
     vector[] byte uri = [] .. "resources/animGar.mp4";
 
     var Media.Video m1 = val Media.Video (
-                            &uri,
-                            Region(0, 0, 1, width/2, height/2),
-                            1.0,
-                            1.0,
-                         );
+                                &uri,
+                                Region(0, 0, 1, width/2, height/2),
+                                1.0,
+                                1.0,
+                             );
 
     var Media.Video m2 = val Media.Video (
-                            &uri,
-                            Region(width/2, height/2, 1, width/2, height/2),
-                            1.0,
-                            0
-                         );
+                                &uri,
+                                Region(width/2, height/2, 1, width/2, height/2),
+                                1.0,
+                                0
+                             );
 
     watching 30s do
         loop do

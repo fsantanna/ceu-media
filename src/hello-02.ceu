@@ -13,7 +13,7 @@ watching Scene(Size(width,height),true) => (scene) do
                                         Region(0, 0, 1, width, height),
                                         1.0,
                                         1.0
-                                );
+                                    );
             await Play(&scene, &m);
         end
     end
