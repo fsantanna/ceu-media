@@ -68,6 +68,7 @@ end
 
 data IScene with
     var&  _lp_Scene_ptr          ptr;
+    var&  Size?                  size;
     event (int, int, int, bool)  ok_mouse_clicked;
     event (int, int)             ok_mouse_moved;
     event (_char_ptr_ext, bool)  ok_keyed;
@@ -102,7 +103,7 @@ do
 
     var& _lp_Scene_ptr ptr = &ptr_!;
 
-    var IScene scene_ = val IScene(&ptr_!,_,_,_);
+    var IScene scene_ = val IScene(&ptr_!,&size,_,_,_);
     scene = &scene_;
 
     _g_object_set (ptr, "slave-audio", true, null);
