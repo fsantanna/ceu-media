@@ -28,16 +28,20 @@ data Media with
     vector&[] byte uri;
 end
 
-data Media.Video with
-    var Region region;
-    var float  alpha;
-    var float  volume;
-end
-
 data Media.Text with
     vector&[] byte   font;
     var       Region region;
     var       uint   color;
+end
+
+data Media.Audio with
+    var float volume;
+end
+
+data Media.Video with
+    var Region region;
+    var float  alpha;
+    var float  volume;
 end
 
 #if 0
@@ -234,13 +238,40 @@ data IPlay with
     var&  _lp_Media_ptr ptr;
 end
 
-code/tight/dynamic Play_Set_Properties (var& IPlay play,
+code/tight/dynamic Play_Set_Media (var& IPlay play,
                                         dynamic var& Media media)
                                             => void
 do
     _ceu_dbg_assert(0);
 end
-code/tight/dynamic Play_Set_Properties (var& IPlay play,
+code/tight/dynamic Play_Set_Media (var& IPlay play,
+                                        dynamic var& Media.Text text)
+                                            => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "text",       &&text.uri[0],
+        "text-font",  &&text.font[0],
+        "text-color", text.color,
+        "x",          text.region.x,
+        "y",          text.region.y,
+        "z",          text.region.z,
+        "width",      text.region.width,
+        "height",     text.region.height,
+        null
+    );
+end
+code/tight/dynamic Play_Set_Media (var& IPlay play,
+                                        dynamic var& Media.Audio audio)
+                                            => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "volume", audio.volume,
+        null
+    );
+end
+code/tight/dynamic Play_Set_Media (var& IPlay play,
                                         dynamic var& Media.Video video)
                                             => void
 do
@@ -256,32 +287,25 @@ do
         null
     );
 end
-code/tight/dynamic Play_Set_Properties (var& IPlay play,
-                                        dynamic var& Media.Text text)
-                                            => void
-do
-_printf(">>> TEXT %s %s\n", &&text.uri[0], &&text.font[0]);
-_printf(">>> TEXT %d %d %d\n", text.region.x, text.region.y, text.region.z);
-_printf(">>> TEXT %d %d\n", text.region.width, text.region.height);
-    _g_object_set (
-        _G_OBJECT(play.ptr),
-        "text",       &&text.uri[0],
-        "text-font",  &&text.font[0],
-        "text-color", text.color,
-        "x",          text.region.x,
-        "y",          text.region.y,
-        "z",          text.region.z,
-        "width",      text.region.width,
-        "height",     text.region.height,
-        null
-    );
-end
 
-code/tight Play_Set_Property_Char (var& IPlay play, var& Media.Text text,
-                                   var _char&& name, var _char&& value)
-                                    => void
+code/tight Play_Set_Char (var& IPlay play, var& Media.Text text,
+                          var _char&& name, var _char&& value)
+                            => void
 do
     _g_object_set(play.ptr, name, value, null);
+end
+
+code/tight Play_Set_Int (var& IPlay play, var _char&& name, var int value)
+                            => void
+do
+    _g_object_set(play.ptr, name, value, null);
+end
+
+code/tight Play_Get_Int (var& IPlay play, var _char&& name) => int
+do
+    var int value = 0;
+    _g_object_get (play.ptr, name, &&value, null);
+    escape value;
 end
 
 code/await Play (var& IScene scene, var& Media media)
@@ -296,7 +320,7 @@ do
     var IPlay play_ = val IPlay(_, &ptr!);
     play = &play_;
 
-    call/dynamic Play_Set_Properties(&play_, &media);
+    call/dynamic Play_Set_Media(&play_, &media);
 
     do
         _lp_media_start(play_.ptr);
@@ -341,7 +365,6 @@ end
                   "width", media.IMAGE.region.width, "height", media.IMAGE.region.height,
                   "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
   else/if media.AUDIO then
-    _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
   else/if media.TEXT then
   end
 
@@ -396,7 +419,6 @@ do
                   "width", media.IMAGE.region.width, "height", media.IMAGE.region.height,
                   "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
   else/if media.AUDIO then
-    _g_object_set (_G_OBJECT(&&m!), "volume", media.AUDIO.volume, null);
   else/if media.TEXT then
     _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
                   "font-desc", media.TEXT.font_desc, 
@@ -453,12 +475,6 @@ do
 
   function (char&& name, char&& value) => void set_property_char do
     _g_object_set (&&this.m!, name, value, null);
-  end
-
-  function (char&& name) => int get_property_int do
-    var int value = 0;
-    _g_object_get (&&this.m!, name, &&value, null);
-    return value;
   end
 
   function (char&& name) => bool get_property_bool do
