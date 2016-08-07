@@ -3,17 +3,17 @@
 var int width = 1080;
 var int height = 720;
 
+var Media.Video m = val Media.Video (
+                            "resources/clock.ogv",
+                            Region(0, 0, 1, width, height),
+                            1.0,
+                            1.0
+                        );
+
 var& IScene scene;
 watching Scene(Size(width,height),true) => (scene) do
     watching scene.ok_keyed, scene.ok_mouse_clicked do
         loop do
-            vector[] byte uri = [] .. "resources/clock.ogv";
-            var Media.Video m = val Media.Video (
-                                        &uri,
-                                        Region(0, 0, 1, width, height),
-                                        1.0,
-                                        1.0
-                                    );
             await Play(&scene, &m);
         end
     end

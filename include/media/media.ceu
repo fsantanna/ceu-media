@@ -25,13 +25,13 @@ data Size with
 end
 
 data Media with
-    vector&[] byte uri;
+    var _char_ptr_ext uri;
 end
 
 data Media.Text with
-    vector&[] byte   font;
-    var       Region region;
-    var       uint   color;
+    var _char_ptr_ext font;
+    var Region        region;
+    var uint          color;
 end
 
 data Media.Audio with
