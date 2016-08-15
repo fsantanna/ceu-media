@@ -25,9 +25,9 @@ watching Scene(Size(width,height),true) => (scene) do
         par/or do
             loop do
                 await 1s;
-                //pText.set_property_char ("text", "two");
+                call Play_Set_Char(&text_play, "text", "two");
                 await 1s;
-                //pText.set_property_char ("text", "one");
+                call Play_Set_Char(&text_play, "text", "one");
             end
         with
             loop do
@@ -44,4 +44,3 @@ watching Scene(Size(width,height),true) => (scene) do
 end
 
 escape 0;
-

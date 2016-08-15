@@ -24,47 +24,32 @@ data Size with
   var int height;
 end
 
-data Media with
-    var _char_ptr_ext uri;
-end
+data Media;
 
 data Media.Text with
+    var _char_ptr_ext text;
     var _char_ptr_ext font;
     var Region        region;
     var uint          color;
 end
 
+data Media.Image with
+    var _char_ptr_ext uri;
+    var Region region;
+    var float  alpha;
+end
+
 data Media.Audio with
+    var _char_ptr_ext uri;
     var float volume;
 end
 
 data Media.Video with
+    var _char_ptr_ext uri;
     var Region region;
     var float  alpha;
     var float  volume;
 end
-
-#if 0
-  or
-
-  tag IMAGE with
-    var _char[255] uri;
-    var Region region;
-    var int z;
-    var float alpha;
-  end
-
-  or
-
-  tag AUDIO with
-    var _char[255] uri;
-    var float volume;
-  end 
-
-  or
-
-end
-#endif
 
 data IScene with
     var&  _lp_Scene_ptr          ptr;
@@ -73,8 +58,6 @@ data IScene with
     event (int, int)             ok_mouse_moved;
     event (_char_ptr_ext, bool)  ok_keyed;
 #if 0
-    event (f64, f64) mouse_move_event;
-    event (_char_ptr_ext, int) key_event;
     event (_char_ptr_ext) error_event;
     event (void) quit;
 #endif
@@ -191,6 +174,8 @@ do
         end
     end
 
+    await FOREVER;
+
 #if 0
   par/or do
     loop do
@@ -217,21 +202,12 @@ do
   with
     await quit;
   end
-
-  escape 0;
-
-  function (void) => _lp_Scene && getptr do
-    return &&scene!;
-  end
-
   function (uint value) => void advance_time do
     if auto_advance == false then
       _lp_scene_advance (&&scene!, value);
     end
   end
 #endif
-    await FOREVER;
-
 end
 
 data IPlay with
@@ -239,81 +215,28 @@ data IPlay with
     var&  _lp_Media_ptr ptr;
 end
 
-code/tight/dynamic Play_Set_Media (var& IPlay play,
-                                        dynamic var& Media media)
-                                            => void
-do
-    _ceu_dbg_assert(0);
-end
-code/tight/dynamic Play_Set_Media (var& IPlay play,
-                                        dynamic var& Media.Text text)
-                                            => void
-do
-    _g_object_set (
-        _G_OBJECT(play.ptr),
-        "text",       &&text.uri[0],
-        "text-font",  &&text.font[0],
-        "text-color", text.color,
-        "x",          text.region.x,
-        "y",          text.region.y,
-        "z",          text.region.z,
-        "width",      text.region.width,
-        "height",     text.region.height,
-        null
-    );
-end
-code/tight/dynamic Play_Set_Media (var& IPlay play,
-                                        dynamic var& Media.Audio audio)
-                                            => void
-do
-    _g_object_set (
-        _G_OBJECT(play.ptr),
-        "volume", audio.volume,
-        null
-    );
-end
-code/tight/dynamic Play_Set_Media (var& IPlay play,
-                                        dynamic var& Media.Video video)
-                                            => void
-do
-    _g_object_set (
-        _G_OBJECT(play.ptr),
-        "x",      video.region.x,
-        "y",      video.region.y,
-        "z",      video.region.z,
-        "width",  video.region.width,
-        "height", video.region.height,
-        "alpha",  video.alpha,
-        "volume", video.volume,
-        null
-    );
-end
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media_ptr;
 
-code/tight Play_Set_Char (var& IPlay play, var& Media.Text text,
-                          var _char&& name, var _char&& value)
-                            => void
-do
-    _g_object_set(play.ptr, name, value, null);
-end
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media media) => void;
 
-code/tight Play_Set_Int (var& IPlay play, var _char&& name, var int value)
-                            => void
-do
-    _g_object_set(play.ptr, name, value, null);
-end
+code/tight
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) => void;
 
-code/tight Play_Get_Int (var& IPlay play, var _char&& name) => int
-do
-    var int value = 0;
-    _g_object_get (play.ptr, name, &&value, null);
-    escape value;
-end
+code/tight
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void;
+
+code/tight
+Play_Get_Int (var& IPlay play, var _char&& name) => int;
+
+#include "media/aux.ceu"
 
 code/await Play (var& IScene scene, var& Media media)
                     => (var& IPlay play)
                         => void
 do
-    var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&media.uri[0])
+    var& _lp_Media_ptr? ptr = &call/dynamic Play_New(&scene, &media)
         finalize (ptr) with
             // TODO: who destroys?
         end;
@@ -344,31 +267,6 @@ do
 end
 
 #if 0
-code/await/dynamic Play (var& IScene scene, var& Media.Video video)
-                    => (var& IPlay play)
-                        => void
-do
-    var& _lp_Media_ptr? ptr = &_lp_media_new(scene.ptr, &&video.uri[0])
-        finalize (ptr) with
-            // TODO: who destroys?
-        end;
-
-    var IPlay play_ = val IPlay(_, &ptr!);
-    play = &play_;
-
-end
-#endif
-
-#if 0
-  if media.VIDEO then
-  else/if media.IMAGE then
-    _g_object_set (_G_OBJECT(&&m!), "x", media.IMAGE.region.x, "y", media.IMAGE.region.y,
-                  "width", media.IMAGE.region.width, "height", media.IMAGE.region.height,
-                  "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
-  else/if media.AUDIO then
-  else/if media.TEXT then
-  end
-
 class Player with
   var Scene   &scene;
   var Media   media;
@@ -389,46 +287,6 @@ class Player with
   event (void) start;
   event (void) stop;
 do
-  var _charptr value = null;
-  if media.VIDEO then
-    value = media.VIDEO.uri;
-  else/if media.IMAGE then
-    value = media.IMAGE.uri;
-  else/if media.AUDIO then
-    value = media.AUDIO.uri;
-  else/if media.TEXT then
-    value = media.TEXT.uri;
-  else
-    _assert(media.EMPTY);
-    escape 0; // terminates immediately
-  end
-
-  var _lp_Media &?m;
-    finalize
-      m = &_lp_media_new (scene.getptr(), _UNSAFE(value));
-    with
-      _lp_media_stop (&&m!);
-    end
-
-  if media.VIDEO then
-    _g_object_set (_G_OBJECT(&&m!), "x", media.VIDEO.region.x, "y", media.VIDEO.region.y,
-                  "width", media.VIDEO.region.width, "height", media.VIDEO.region.height,
-                  "z", media.VIDEO.z, "alpha", media.VIDEO.alpha,
-                  "volume", media.VIDEO.volume, null);
-  else/if media.IMAGE then
-    _g_object_set (_G_OBJECT(&&m!), "x", media.IMAGE.region.x, "y", media.IMAGE.region.y,
-                  "width", media.IMAGE.region.width, "height", media.IMAGE.region.height,
-                  "z", media.IMAGE.z, "alpha", media.IMAGE.alpha, null);
-  else/if media.AUDIO then
-  else/if media.TEXT then
-    _g_object_set (_G_OBJECT(&&m!), "text", media.TEXT.uri, 
-                  "font-desc", media.TEXT.font_desc, 
-                  "text-color", media.TEXT.color,
-                  "x", media.TEXT.region.x, "y", media.TEXT.region.y,
-                  "width", media.TEXT.region.width, "height", media.TEXT.region.height,
-                  "z", media.TEXT.z,  null);
-  end
-
   _lp_media_start (&&m!);
   loop do
     var _GObject &&source;

@@ -1,43 +1,45 @@
-#include "media.ceu"
+#include "c.ceu"
+#include "media/media.ceu"
 
-var Region region = Region (76, 74, 650, 440);
+var Region region = val Region(76, 74, 2, 650, 440);
 
-var Media frame = Media.IMAGE ("../../resources/frame.png", Region(0,0,800,585), 1, 1.0);
-var Media piano = Media.AUDIO ("../../resources/piano.ogg", 0.5);
-var Media img1 = Media.IMAGE ("../../resources/img1.jpg", region, 2, 1.0);
-var Media img2 = Media.IMAGE ("../../resources/img2.jpg", region, 2, 1.0);
-var Media img3 = Media.IMAGE ("../../resources/img3.jpg", region, 2, 1.0);
-var Media img4 = Media.IMAGE ("../../resources/img4.jpg", region, 2, 1.0);
+var Media.Image frame = val Media.Image("resources/frame.png",
+                                        Region(0,0,1,800,585),
+                                        1.0);
+var Media.Audio piano = val Media.Audio("resources/piano.ogg", 0.5);
+var Media.Image img1  = val Media.Image("resources/img1.jpg", region, 1.0);
+var Media.Image img2  = val Media.Image("resources/img2.jpg", region, 1.0);
+var Media.Image img3  = val Media.Image("resources/img3.jpg", region, 1.0);
+var Media.Image img4  = val Media.Image("resources/img4.jpg", region, 1.0);
 
-var Scene s with
-  this.size = Size(800,585);
-  this.auto_advance = true;
-end;
+var& IScene scene;
+watching Scene(Size(800,585),true) => (scene)
+do
+    spawn Play(&scene, &frame);
 
-par/or do
-  do Player.play (frame, &s);
-with
-  watching 5s do
-    do Player.play (img1, &s);
-  end
-  watching 5s do
-    do Player.play (img2, &s);
-  end
-  watching 5s do
-    do Player.play (img3, &s);
-  end
-  watching 5s do
-    do Player.play (img4, &s);
-  end
-with
-  loop do
-    do Player.play (piano, &s);
-  end
-with
-  var _charptr key;
-  var int press;
-  (key, press) = await s.key_event 
-          until (_strcmp (key, "q") == 0 and press == 0);
+    par/or do
+        watching 5s do
+            await Play(&scene, &img1);
+        end
+        watching 5s do
+            await Play(&scene, &img2);
+        end
+        watching 5s do
+            await Play(&scene, &img3);
+        end
+        watching 5s do
+            await Play(&scene, &img4);
+        end
+    with
+        loop do
+            await Play(&scene, &piano);
+        end
+    with
+        var _char_ptr_ext key;
+        var bool pressed;
+        (key, pressed) = await scene.ok_keyed
+                         until (not pressed) and _strcmp(key,"q")==0;
+    end
 end
 
 escape 0;

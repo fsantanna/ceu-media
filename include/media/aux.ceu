@@ -1,0 +1,124 @@
+#ifndef _CEU_MEDIA_AUX
+#define _CEU_MEDIA_AUX
+
+/* Play_New */
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media_ptr
+do
+    _ceu_dbg_assert(0);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Text media) => _lp_Media_ptr
+do
+    escape _lp_media_new(scene.ptr, null);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Image media) => _lp_Media_ptr
+do
+    escape _lp_media_new(scene.ptr, media.uri);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Video media) => _lp_Media_ptr
+do
+    escape _lp_media_new(scene.ptr, media.uri);
+end
+
+code/tight/dynamic
+Play_New (var& IScene scene, dynamic var& Media.Audio media) => _lp_Media_ptr
+do
+    escape _lp_media_new(scene.ptr, media.uri);
+end
+
+/* Play_Set_Media */
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media media) => void
+do
+    _ceu_dbg_assert(0);
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Text text) => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "text",       text.text,
+        "text-font",  text.font,
+        "text-color", text.color,
+        "x",          text.region.x,
+        "y",          text.region.y,
+        "z",          text.region.z,
+        "width",      text.region.width,
+        "height",     text.region.height,
+        null
+    );
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Image image) => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "x",      image.region.x,
+        "y",      image.region.y,
+        "z",      image.region.z,
+        "width",  image.region.width,
+        "height", image.region.height,
+        "alpha",  image.alpha,
+        null
+    );
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Audio audio) => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "volume", audio.volume,
+        null
+    );
+end
+
+code/tight/dynamic
+Play_Set_Media (var& IPlay play, dynamic var& Media.Video video) => void
+do
+    _g_object_set (
+        _G_OBJECT(play.ptr),
+        "x",      video.region.x,
+        "y",      video.region.y,
+        "z",      video.region.z,
+        "width",  video.region.width,
+        "height", video.region.height,
+        "alpha",  video.alpha,
+        "volume", video.volume,
+        null
+    );
+end
+
+/* Play_Set_* */
+
+code/tight
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) => void
+do
+    _g_object_set(play.ptr, name, value, null);
+end
+
+code/tight
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void
+do
+    _g_object_set(play.ptr, name, value, null);
+end
+
+code/tight
+Play_Get_Int (var& IPlay play, var _char&& name) => int
+do
+    var int value = 0;
+    _g_object_get (play.ptr, name, &&value, null);
+    escape value;
+end
+
+#endif
