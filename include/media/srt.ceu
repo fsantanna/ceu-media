@@ -4,7 +4,7 @@
 #include "uv/fs.ceu"
 #include "media/media.ceu"
 
-code/await Srt (var& IScene scene, var _char&& path, var Region region) => void
+code/await Srt (var& IScene scene, var _char_ptr_ext path, var Region region) => void
 do
     var& UV_FS_File file;
     watching UV_FS_Open(path, _O_RDONLY, 0) => (file) do

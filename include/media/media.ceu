@@ -94,9 +94,9 @@ do
 
     spawn do
         async (ptr) do
-            loop do 
+            loop do
                 var _lp_Event &&evt;
-                evt = _lp_scene_receive (ptr, false); 
+                evt = _lp_scene_receive (ptr, false);
                 if evt != null then
                     emit LP_EVENT(_lp_event_get_source(evt), evt);
                 end
@@ -108,7 +108,7 @@ do
     par/or do
         await FOREVER;
     with
-        if auto_advance == true then 
+        if auto_advance == true then
             every FREQ ms do
                 _lp_scene_advance(ptr, FREQ * NS);
             end
@@ -141,7 +141,7 @@ do
                     "press", &&pressed,
                     null,
                 );
-        
+
                 emit scene_.ok_mouse_clicked(x as int, y as int,
                                              button, pressed as bool);
             else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
@@ -181,7 +181,7 @@ do
     loop do
       var _GObject &&source;
       var _lp_Event &&evt;
-      (source, evt) = await LP_EVENT until (_LP_IS_SCENE(source) and 
+      (source, evt) = await LP_EVENT until (_LP_IS_SCENE(source) and
                                           _LP_SCENE(source) == &&scene!);
       var _GType type = _G_OBJECT_TYPE (evt);
       else/if type == _LP_TYPE_EVENT_ERROR then
@@ -291,7 +291,7 @@ do
   loop do
     var _GObject &&source;
     var _lp_Event &&evt;
-    (source, evt) = await LP_EVENT 
+    (source, evt) = await LP_EVENT
                   until (_LP_IS_MEDIA(source) and _LP_MEDIA(source) == &&this.m!);
     var _GType type = _G_OBJECT_TYPE (evt);
     if type == _LP_TYPE_EVENT_START then
@@ -311,15 +311,15 @@ do
   end
 
   function (Region r) => void set_region_bounds do
-    _g_object_set (&&this.m!, "x", r.x, "y", r.y, 
+    _g_object_set (&&this.m!, "x", r.x, "y", r.y,
             "width", r.width, "height", r.height, null);
   end
 
   function (int x, int y, int width, int height) => void set_bounds do
-    _g_object_set (&&this.m!, "x", x, "y", y, 
+    _g_object_set (&&this.m!, "x", x, "y", y,
             "width", width, "height", height, null);
   end
-  
+
   function (char&& name, float value) => void set_property_float do
     _g_object_set (&&this.m!, name, value, null);
   end
