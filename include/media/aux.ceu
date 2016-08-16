@@ -121,4 +121,18 @@ do
     escape value;
 end
 
+code/tight
+Play_Set_Region (var& IPlay play, var Region region) => void
+do
+    _g_object_set(
+        _G_OBJECT(play.ptr),
+        "x", region.x,
+        "y", region.y,
+        "z", region.z,
+        "width", region.width,
+        "height", region.height,
+        null
+    );
+end
+
 #endif
