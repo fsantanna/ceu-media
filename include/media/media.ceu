@@ -52,7 +52,7 @@ data Media.Video with
 end
 
 data IScene with
-    var&  _lp_Scene_ptr          ptr;
+    var&  _lp_Scene              ref;
     var&  Size?                  size;
     event (int, int, int, bool)  ok_mouse_clicked;
     event (int, int)             ok_mouse_moved;
@@ -79,24 +79,24 @@ do
         h = size!.height;
     end
 
-    var& _lp_Scene_ptr? ptr_ = &_lp_scene_new(w, h)
-        finalize (ptr_) with
-            _g_object_unref (_G_OBJECT(ptr_!));
+    var&? _lp_Scene ref_ = &_lp_scene_new(w, h)
+        finalize (ref_) with
+            _g_object_unref (_G_OBJECT(&&ref_!));
         end;
 
-    var& _lp_Scene_ptr ptr = &ptr_!;
+    var& _lp_Scene ref = &ref_!;
 
-    var IScene scene_ = val IScene(&ptr_!,&size,_,_,_);
+    var IScene scene_ = val IScene(&ref_!,&size,_,_,_);
     scene = &scene_;
 
-    _g_object_set (ptr, "slave-audio", true, null);
-    _g_object_set (ptr, "lockstep",    true, null);
+    _g_object_set (&&ref, "slave-audio", true, null);
+    _g_object_set (&&ref, "lockstep",    true, null);
 
     spawn do
-        async (ptr) do
+        async (ref) do
             loop do
                 var _lp_Event &&evt;
-                evt = _lp_scene_receive (ptr, false);
+                evt = _lp_scene_receive (&&ref, false);
                 if evt != null then
                     emit LP_EVENT(_lp_event_get_source(evt), evt);
                 end
@@ -110,7 +110,7 @@ do
     with
         if auto_advance == true then
             every FREQ ms do
-                _lp_scene_advance(ptr, FREQ * NS);
+                _lp_scene_advance(&&ref, FREQ * NS);
             end
         else
             await FOREVER;
@@ -119,7 +119,7 @@ do
         loop do
             var _GObject&&  source;
             var _lp_Event&& evt;
-            (source, evt) = await LP_EVENT until (_LP_SCENE(source) == ptr);
+            (source, evt) = await LP_EVENT until (_LP_SCENE(source) == &&ref);
 
             var _GType type = _G_OBJECT_TYPE (evt);
 
@@ -211,12 +211,12 @@ do
 end
 
 data IPlay with
-    event void          ok;
-    var&  _lp_Media_ptr ptr;
+    event void      ok;
+    var&  _lp_Media ref;
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media_ptr;
+Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media&&;
 
 code/tight/dynamic
 Play_Set_Media (var& IPlay play, dynamic var& Media media) => void;
@@ -236,26 +236,26 @@ code/await Play (var& IScene scene, var& Media media)
                     => (var& IPlay play)
                         => void
 do
-    var& _lp_Media_ptr? ptr = &call/dynamic Play_New(&scene, &media)
-        finalize (ptr) with
+    var&? _lp_Media ref = &call/dynamic Play_New(&scene, &media)
+        finalize (ref) with
             // TODO: who destroys?
         end;
 
-    var IPlay play_ = val IPlay(_, &ptr!);
+    var IPlay play_ = val IPlay(_, &ref!);
     play = &play_;
 
     call/dynamic Play_Set_Media(&play_, &media);
 
     do
-        _lp_media_start(play_.ptr);
-    finalize (play_.ptr) with
-        _lp_media_stop(play_.ptr);
+        _lp_media_start(&&play_.ref);
+    finalize (play_.ref) with
+        _lp_media_stop(&&play_.ref);
     end
 
     loop do
         var _GObject&&  source;
         var _lp_Event&& evt;
-        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == play_.ptr);
+        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == &&play_.ref);
 
         var _GType type = _G_OBJECT_TYPE(evt);
         if type == _LP_TYPE_EVENT_START then

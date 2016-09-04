@@ -42,10 +42,10 @@ native
     _GObject,
     _GType,
     _lp_Event,
-    _lp_Media_ptr,
+    _lp_Media,
     _lp_media_start,
     _lp_scene_new,
-    _lp_Scene_ptr,
+    _lp_Scene,
 ;
 
 input (_GObject&&, _lp_Event&&) LP_EVENT;
@@ -53,10 +53,7 @@ input (_GObject&&, _lp_Event&&) LP_EVENT;
 native/pre do
     ##include <glib.h>
     ##include <play.h>
-
-    typedef char*     char_ptr_ext;
-    typedef lp_Media* lp_Media_ptr;
-    typedef lp_Scene* lp_Scene_ptr;
+    typedef char* char_ptr_ext;
 end
 
 #if 0

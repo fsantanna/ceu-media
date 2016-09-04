@@ -4,33 +4,33 @@
 /* Play_New */
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media_ptr
+Play_New (var& IScene scene, dynamic var& Media media) => _lp_Media&&
 do
     _ceu_dbg_assert(0);
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media.Text media) => _lp_Media_ptr
+Play_New (var& IScene scene, dynamic var& Media.Text media) => _lp_Media&&
 do
-    escape _lp_media_new(scene.ptr, null);
+    escape _lp_media_new(&&scene.ref, null);
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media.Image media) => _lp_Media_ptr
+Play_New (var& IScene scene, dynamic var& Media.Image media) => _lp_Media&&
 do
-    escape _lp_media_new(scene.ptr, media.uri);
+    escape _lp_media_new(&&scene.ref, media.uri);
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media.Video media) => _lp_Media_ptr
+Play_New (var& IScene scene, dynamic var& Media.Video media) => _lp_Media&&
 do
-    escape _lp_media_new(scene.ptr, media.uri);
+    escape _lp_media_new(&&scene.ref, media.uri);
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media.Audio media) => _lp_Media_ptr
+Play_New (var& IScene scene, dynamic var& Media.Audio media) => _lp_Media&&
 do
-    escape _lp_media_new(scene.ptr, media.uri);
+    escape _lp_media_new(&&scene.ref, media.uri);
 end
 
 /* Play_Set_Media */
@@ -45,7 +45,7 @@ code/tight/dynamic
 Play_Set_Media (var& IPlay play, dynamic var& Media.Text text) => void
 do
     _g_object_set (
-        _G_OBJECT(play.ptr),
+        _G_OBJECT(&&play.ref),
         "text",       text.text,
         "text-font",  text.font,
         "text-color", text.color,
@@ -62,7 +62,7 @@ code/tight/dynamic
 Play_Set_Media (var& IPlay play, dynamic var& Media.Image image) => void
 do
     _g_object_set (
-        _G_OBJECT(play.ptr),
+        _G_OBJECT(&&play.ref),
         "x",      image.region.x,
         "y",      image.region.y,
         "z",      image.region.z,
@@ -77,7 +77,7 @@ code/tight/dynamic
 Play_Set_Media (var& IPlay play, dynamic var& Media.Audio audio) => void
 do
     _g_object_set (
-        _G_OBJECT(play.ptr),
+        _G_OBJECT(&&play.ref),
         "volume", audio.volume,
         null
     );
@@ -87,7 +87,7 @@ code/tight/dynamic
 Play_Set_Media (var& IPlay play, dynamic var& Media.Video video) => void
 do
     _g_object_set (
-        _G_OBJECT(play.ptr),
+        _G_OBJECT(&&play.ref),
         "x",      video.region.x,
         "y",      video.region.y,
         "z",      video.region.z,
@@ -104,20 +104,20 @@ end
 code/tight
 Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) => void
 do
-    _g_object_set(play.ptr, name, value, null);
+    _g_object_set(&&play.ref, name, value, null);
 end
 
 code/tight
 Play_Set_Int (var& IPlay play, var _char&& name, var int value) => void
 do
-    _g_object_set(play.ptr, name, value, null);
+    _g_object_set(&&play.ref, name, value, null);
 end
 
 code/tight
 Play_Get_Int (var& IPlay play, var _char&& name) => int
 do
     var int value = 0;
-    _g_object_get (play.ptr, name, &&value, null);
+    _g_object_get (&&play.ref, name, &&value, null);
     escape value;
 end
 
@@ -125,7 +125,7 @@ code/tight
 Play_Set_Region (var& IPlay play, var Region region) => void
 do
     _g_object_set(
-        _G_OBJECT(play.ptr),
+        _G_OBJECT(&&play.ref),
         "x", region.x,
         "y", region.y,
         "z", region.z,
