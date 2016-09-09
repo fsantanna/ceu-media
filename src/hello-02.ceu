@@ -4,7 +4,7 @@ var int width = 1080;
 var int height = 720;
 
 var Media.Video m = val Media.Video (
-                            "resources/clock.ogv",
+                            [].."resources/clock.ogv",
                             Region(0, 0, 1, width, height),
                             1.0,
                             1.0

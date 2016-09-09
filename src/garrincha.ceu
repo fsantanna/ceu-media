@@ -12,31 +12,31 @@ var Region frame = val Region (
                        );
 
 var Media.Image back = val Media.Image (
-                            "resources/background.png",
+                            [].."resources/background.png",
                             Region(0, 0, 1, scene_width, scene_height),
                             1.0,
                            );
 
 var Media.Video anim = val Media.Video (
-                            "resources/animGar.mp4",
+                            [].."resources/animGar.mp4",
                             Region(0, 0, 2, scene_width, scene_height),
                             1.0,
                             1.0,
                            );
 
-var Media.Audio choro = val Media.Audio("resources/choro.mp4", 1.0);
+var Media.Audio choro = val Media.Audio([].."resources/choro.mp4", 1.0);
 
 var Media.Video drible = val Media.Video (
-                                "resources/drible.mp4",
+                                [].."resources/drible.mp4",
                                 frame,
                                 1.0,
                                 1.0,
                              );
 
-var Media.Image photo = val Media.Image("resources/photo.png", frame, 0.6);
+var Media.Image photo = val Media.Image([].."resources/photo.png", frame, 0.6);
 
 var Media.Image icon = val Media.Image (
-                            "resources/icon.png",
+                            [].."resources/icon.png",
                             Region(
                                 (0.875 * scene_width) as int,
                                 (0.117 * scene_height) as int,
@@ -48,7 +48,7 @@ var Media.Image icon = val Media.Image (
                            );
 
 var Media.Video shoes = val Media.Video (
-                                "resources/shoes.mp4",
+                                [].."resources/shoes.mp4",
                                 Region(
                                     (0.15 * scene_width) as int,
                                     (0.6 * scene_height) as int,

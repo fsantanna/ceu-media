@@ -18,19 +18,19 @@ end
 code/tight/dynamic
 Play_New (var& IScene scene, dynamic var& Media.Image media) => _lp_Media&&
 do
-    escape _lp_media_new(&&scene.ref, media.uri);
+    escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
 code/tight/dynamic
 Play_New (var& IScene scene, dynamic var& Media.Video media) => _lp_Media&&
 do
-    escape _lp_media_new(&&scene.ref, media.uri);
+    escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
 code/tight/dynamic
 Play_New (var& IScene scene, dynamic var& Media.Audio media) => _lp_Media&&
 do
-    escape _lp_media_new(&&scene.ref, media.uri);
+    escape _lp_media_new(&&scene.ref, &&media.uri[0]);
 end
 
 /* Play_Set_Media */
@@ -46,8 +46,8 @@ Play_Set_Media (var& IPlay play, dynamic var& Media.Text text) => void
 do
     _g_object_set (
         _G_OBJECT(&&play.ref),
-        "text",       text.text,
-        "text-font",  text.font,
+        "text",       &&text.text[0],
+        "text-font",  &&text.font[0],
         "text-color", text.color,
         "x",          text.region.x,
         "y",          text.region.y,

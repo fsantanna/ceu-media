@@ -27,28 +27,28 @@ end
 data Media;
 
 data Media.Text with
-    var _char_ptr_ext text;
-    var _char_ptr_ext font;
-    var Region        region;
-    var uint          color;
+    vector[] byte   text;
+    vector[] byte   font;
+    var      Region region;
+    var      uint   color;
 end
 
 data Media.Image with
-    var _char_ptr_ext uri;
-    var Region region;
-    var float  alpha;
+    vector[] byte   uri;
+    var      Region region;
+    var      float  alpha;
 end
 
 data Media.Audio with
-    var _char_ptr_ext uri;
-    var float volume;
+    vector[] byte  uri;
+    var      float volume;
 end
 
 data Media.Video with
-    var _char_ptr_ext uri;
-    var Region region;
-    var float  alpha;
-    var float  volume;
+    vector[] byte   uri;
+    var      Region region;
+    var      float  alpha;
+    var      float  volume;
 end
 
 data IScene with

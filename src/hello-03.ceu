@@ -5,14 +5,14 @@ var int width = 640;
 var int height = 480;
 
 var Media.Text text = val Media.Text (
-                            "one",
-                            "sans 40",
+                            [].."one",
+                            [].."sans 40",
                             Region(0, 400, 2, width, 80),
                             0xffff0048,
                           );
 
 var Media.Video video = val Media.Video (
-                                "resources/night.avi",
+                                [].."resources/night.avi",
                                 Region(0, 0, 1, width, height),
                                 1.0,
                                 1.0,

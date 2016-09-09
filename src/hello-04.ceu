@@ -5,14 +5,14 @@ var int width = 640;
 var int height = 480;
 
 var Media.Video back = val Media.Video (
-                                "resources/animGar.mp4",
+                                [].."resources/animGar.mp4",
                                 Region(0, 0, 1, width, height),
                                 1.0,
                                 1.0,
                             );
 
 var Media.Video video = val Media.Video (
-                                "resources/diode.mp4",
+                                [].."resources/diode.mp4",
                                 Region(0, 0, 2, 320, 240),
                                 0.75,
                                 1.0,
