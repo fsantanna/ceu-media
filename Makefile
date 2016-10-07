@@ -1,23 +1,17 @@
-###############################################################################
-# EDIT
-###############################################################################
+#CEU_DIR    = $(error set absolute path to "<ceu>" repository)
+#CEU_UV_DIR = $(error set absolute path to "<ceu-libuv>" repository)
 
-CEU_DIR ?= $(error set absolute path to "<ceu>" repository)
+CEU_DIR    = /data/ceu/ceu
+CEU_UV_DIR = /data/ceu/ceu-libuv
 
-###############################################################################
-# DO NOT EDIT
-###############################################################################
-
-MEDIA_DIR ?= .
-ARCH_DIR ?= $(MEDIA_DIR)/arch
-include $(CEU_DIR)/Makefile
-
-ifneq ($(MAKECMDGOALS),link)
-ifeq ("$(wildcard $(MEDIA_DIR)/arch/up)","")
-$(error run "make link")
-endif
-endif
-
-link:
-	rm -f arch/up
-	ln -s `readlink -f $(CEU_DIR)/arch` $(MEDIA_DIR)/arch/up
+all:
+	ceu --pre --pre-args="-I$(CEU_DIR)/include -I$(CEU_UV_DIR)/include -I./include" \
+	          --pre-input=src/hello-01.ceu                                  \
+	    --ceu                                                               \
+	    --env --env-types=/data/ceu/ceu/env/types.h                         \
+	          --env-threads=/data/ceu/ceu/env/threads.h                     \
+	          --env-main=/data/ceu/ceu/env/main.c                           \
+	          --env-output=/tmp/x.c                                         \
+	    --cc --cc-args="-lm -llua5.3 -lpthread -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lSDL2_gfx" \
+	         --cc-output=hello-01
+	./hello-01
