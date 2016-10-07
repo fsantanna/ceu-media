@@ -1,7 +1,3 @@
-#if 0
-ceu --pre --pre-args="-I/data/ceu/ceu/include -I/data/ceu/ceu-libuv/include -I/data/ceu/ceu-media/include" --pre-input="src/hello-01.ceu" --ceu --env --env-types=/data/ceu/ceu/env/types.h --env-threads=/data/ceu/ceu/env/threads.h --env-main=/data/ceu/ceu/env/main.c --env-output=/tmp/x.c --cc --cc-args="`pkg-config play --libs --cflags` -luv -llua5.3 -lpthread -g" --cc-output=/tmp/x.exe
-#endif
-
 #include "c.ceu"
 #include "media/media.ceu"
 

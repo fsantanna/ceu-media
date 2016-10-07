@@ -5,13 +5,13 @@ var& IScene scene;
 watching Scene(Size(1080,720),true) => (scene)
 do
     var Media.Video m1 = val Media.Video (
-                                "resources/misc.avi",
+                                [].."resources/misc.avi",
                                 Region(0, 0, 1, scene.size!.width, scene.size!.height),
                                 1.0,
                                 1.0,
                          );
     var Media.Video m2 = val Media.Video (
-                                "resources/bars.ogg",
+                                [].."resources/bars.ogg",
                                 Region(0, 0, 1, scene.size!.width, scene.size!.height),
                                 1.0,
                                 1.0,

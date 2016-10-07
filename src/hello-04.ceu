@@ -18,7 +18,10 @@ var Media.Video video = val Media.Video (
                                 1.0,
                             );
 
-var Media.Audio audio = val Media.Audio ("resources/choro.mp4", 0.5);
+var Media.Audio audio = val Media.Audio (
+                                [].."resources/choro.mp4",
+                                0.5,
+                            );
 
 var& IScene scene;
 watching Scene(Size(width,height),true) => (scene)
