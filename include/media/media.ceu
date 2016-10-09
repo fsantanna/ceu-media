@@ -93,7 +93,7 @@ do
     _g_object_set (&&ref, "lockstep",    true, null);
 
     spawn do
-        async (ref) do
+        await async (ref) do
             loop do
                 var _lp_Event &&evt;
                 evt = _lp_scene_receive (&&ref, false);
