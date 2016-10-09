@@ -4,7 +4,7 @@ CEU_UV_DIR = $(error set absolute path to "<ceu-libuv>" repository)
 all:
 	ceu --pre --pre-args="-I$(CEU_DIR)/include -I$(CEU_UV_DIR)/include -I./include" \
 	          --pre-input=src/hello-01.ceu                                  \
-	    --ceu                                                               \
+	    --ceu --ceu-err-unused=pass --ceu-err-uninitialized=pass            \
 	    --env --env-types=/data/ceu/ceu/env/types.h                         \
 	          --env-threads=/data/ceu/ceu/env/threads.h                     \
 	          --env-main=/data/ceu/ceu/env/main.c                           \
