@@ -13,6 +13,7 @@ do
 
         var int   now = 0;
         var usize off = 0;
+        var int i;
         loop i do
             var int fr = 0;
             var int to = 0;
