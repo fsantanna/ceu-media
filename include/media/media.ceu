@@ -202,7 +202,7 @@ end
         _g_object_get (_G_OBJECT(evtError), "error", &&err, null);
         msg = _lp_event_to_string (_LP_EVENT(evtError));
 
-        emit error_event -> (msg);
+        emit error_event -> (&msg);
 
         finalize with
           _g_free (msg);
