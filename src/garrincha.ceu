@@ -17,7 +17,7 @@ var Media.Image back = val Media.Image (
                             1.0,
                            );
 
-var Media.Video anim = val Media.Video (
+var Media.Video video_anim = val Media.Video (
                             [].."resources/animGar.mp4",
                             Region(0, 0, 2, scene_width, scene_height),
                             1.0,
@@ -33,7 +33,7 @@ var Media.Video drible = val Media.Video (
                                 1.0,
                              );
 
-var Media.Image photo = val Media.Image([].."resources/photo.png", frame, 0.6);
+var Media.Image img_photo = val Media.Image([].."resources/photo.png", frame, 0.6);
 
 var Media.Image icon = val Media.Image (
                             [].."resources/icon.png",
@@ -62,36 +62,38 @@ var Media.Video shoes = val Media.Video (
 
 event (int, int, int, int) resize;
 
-var& IScene scene;
-watching Scene(Size(scene_width,scene_height),true) -> (&scene)
-do
-    spawn Play(&scene, &back);
-    var& IPlay play_anim;
-    watching Play(&scene, &anim) -> (&play_anim) do
+var&? Scene s = spawn Scene(Size(scene_width,scene_height),true);
+watching s do
+    spawn Play(&s.scene, &back);
+    var&? Play anim = spawn Play(&s.scene, &video_anim);
+    watching anim do
         par do
-            var int x, y, width, height;
+            var int x;
+            var int y;
+            var int width;
+            var int height;
             every (x, y, width, height) in resize do
-                call Play_Set_Region(&play_anim,
-                                     Region(x, y, anim.region.z, width, height));
+                call Play_Set_Region(&anim.play,
+                                     Region(x, y, video_anim.region.z, width, height));
             end
         with
             await 5s;
-            await Play(&scene, &choro);
+            await Play(&s.scene, &choro);
         with
             await 12s;
-            await Play(&scene, &drible);
+            await Play(&s.scene, &drible);
         with
             await 41s;
-            var& IPlay play_photo;
-            watching Play(&scene,&photo) -> (&play_photo) do
+            var&? Play photo = spawn Play(&s.scene, &img_photo);
+            watching photo do
                 watching 5s do
                     await 1s;
-                    var int top = call Play_Get_Int(&play_photo,"y");
+                    var int top = call Play_Get_Int(&photo.play,"y");
                     var int diff = 290 - top;
                     var int amount = 1;
                     watching 3s do
-                        every (3000.0/diff)ms do
-                            call Play_Set_Int(&play_photo, "y", top + amount);
+                        every ((3000.0/diff) as int)ms do
+                            call Play_Set_Int(&photo.play, "y", top + amount);
                             amount = amount + 1;
                         end
                     end
@@ -101,9 +103,9 @@ do
             await 45s;
             var bool clicked = do
                 watching 6s do
-                    spawn Play(&scene, &icon);
+                    spawn Play(&s.scene, &icon);
                     var _char_ptr_ext key;
-                    (key,_) = await scene.ok_keyed
+                    (key,_) = await s.scene.ok_keyed
                               until _strcmp(key,"F1") == 0;
                     escape true;
                 end
@@ -117,7 +119,7 @@ do
                         (0.45   * scene_width)  as int,
                         (0.45   * scene_height) as int,
                      );
-                await Play(&scene, &shoes);
+                await Play(&s.scene, &shoes);
                 emit resize(0, 0, scene_width, scene_height);
             end
         end

@@ -23,41 +23,40 @@ var Media.Audio audio = val Media.Audio (
                                 0.5,
                             );
 
-var& IScene scene;
-watching Scene(Size(width,height),true) -> (&scene)
-do
-    spawn Play(&scene, &back);
+var&? Scene s = spawn Scene(Size(width,height),true);
+watching s do
+    spawn Play(&s.scene, &back);
 
-    var& IPlay play_video;
-    watching Play(&scene, &video) -> (&play_video) do
+    var&? Play p = spawn Play(&s.scene, &video);
+    watching p do
         par/or do
             var _char_ptr_ext key;
-            (key,_) = await scene.ok_keyed until (_strcmp(key,"q") == 0);
+            (key,_) = await s.scene.ok_keyed until (_strcmp(key,"q") == 0);
         with
             loop do
-                var int x = call Play_Get_Int(&play_video, "x");
-                var int y = call Play_Get_Int(&play_video, "y");
+                var int x = call Play_Get_Int(&p.play, "x");
+                var int y = call Play_Get_Int(&p.play, "y");
 
                 var _char_ptr_ext key;
-                (key, _) = await scene.ok_keyed;
+                (key, _) = await s.scene.ok_keyed;
                 if _strcmp (key, "Left") == 0 then
-                    call Play_Set_Int(&play_video, "x", x-10);
+                    call Play_Set_Int(&p.play, "x", x-10);
                 else/if _strcmp (key, "Right") == 0 then
-                    call Play_Set_Int(&play_video, "x", x+10);
+                    call Play_Set_Int(&p.play, "x", x+10);
                 else/if _strcmp (key, "Up") == 0 then
-                    call Play_Set_Int(&play_video, "y", y-10);
+                    call Play_Set_Int(&p.play, "y", y-10);
                 else/if _strcmp (key, "Down") == 0 then
-                    call Play_Set_Int(&play_video, "y", y+10);
+                    call Play_Set_Int(&p.play, "y", y+10);
                 end
             end
         with
             loop do
                 var _char_ptr_ext key;
                 var bool pressed;
-                (key, pressed) = await scene.ok_keyed
+                (key, pressed) = await s.scene.ok_keyed
                                  until pressed and _strcmp(key,"space")==0;
-                spawn Play(&scene, &audio);
-                (key, pressed) = await scene.ok_keyed
+                spawn Play(&s.scene, &audio);
+                (key, pressed) = await s.scene.ok_keyed
                                  until pressed and _strcmp (key,"space")==0;
             end
         end

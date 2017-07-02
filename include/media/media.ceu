@@ -70,24 +70,22 @@ end
 #endif
 
 code/await Scene (var Size? size, var bool auto_advance)
-                    -> (var& IScene scene)
+                    -> (var IScene scene)
                         -> void
 do
-    var int w=0, h=0;
+    var int w = 0;
+    var int h = 0;
     if size? then
         w = size!.width;
         h = size!.height;
     end
 
-    var&? _lp_Scene ref_ = &_lp_scene_new(w, h)
-        finalize (ref_) with
-            _g_object_unref (_G_OBJECT(&&ref_!));
+    var& _lp_Scene ref = &_lp_scene_new(w, h)
+        finalize (ref) with
+            _g_object_unref (_G_OBJECT(&&ref));
         end;
 
-    var& _lp_Scene ref = &ref_!;
-
-    var IScene scene_ = val IScene(&ref_!,&size,_,_,_);
-    scene = &scene_;
+    scene = val IScene(&ref,&size,_,_,_);
 
     _g_object_set (&&ref, "slave-audio", true, null);
     _g_object_set (&&ref, "lockstep",    true, null);
@@ -141,8 +139,10 @@ end
 // TODO: (x,y) sao "float"?
 //  - mudei os eventos internos p/ "int"
 
-                var f64 x=_, y=_;
-                var int button=_, pressed=_;
+                var f64 x = _;
+                var f64 y = _;
+                var int button = _;
+                var int pressed = _;
                 _g_object_get(
                     _G_OBJECT(evt_),
                     "x", &&x,
@@ -152,15 +152,16 @@ end
                     null,
                 );
 
-                emit scene_.ok_mouse_clicked(x as int, y as int,
+                emit scene.ok_mouse_clicked(x as int, y as int,
                                              button, pressed as bool);
             else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
                 var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
 
-                var f64 x=_, y=_;
+                var f64 x = _;
+                var f64 y = _;
                 _g_object_get(_G_OBJECT(evt_), "x",&&x, "y",&&y, null);
 
-                emit scene_.ok_mouse_moved(x as int, y as int);
+                emit scene.ok_mouse_moved(x as int, y as int);
 
             /* KEY */
 
@@ -179,7 +180,7 @@ end
                     _g_free (key);
                 end
 
-                emit scene_.ok_keyed(key, pressed as bool);
+                emit scene.ok_keyed(key, pressed as bool);
             end
         end
     end
@@ -226,10 +227,10 @@ data IPlay with
 end
 
 code/tight/dynamic
-Play_New (var& IScene scene, dynamic var& Media media) -> _lp_Media&&;
+Play_New (var& IScene scene, var&/dynamic Media media) -> _lp_Media&&;
 
 code/tight/dynamic
-Play_Set_Media (var& IPlay play, dynamic var& Media media) -> void;
+Play_Set_Media (var& IPlay play, var&/dynamic Media media) -> void;
 
 code/tight
 Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> void;
@@ -243,7 +244,7 @@ Play_Get_Int (var& IPlay play, var _char&& name) -> int;
 #include "media/aux.ceu"
 
 code/await Play (var& IScene scene, var& Media media)
-                    -> (var& IPlay play)
+                    -> (var IPlay play)
                         -> void
 do
     var&? _lp_Media ref = &call/dynamic Play_New(&scene, &media)
@@ -251,25 +252,24 @@ do
             // TODO: who destroys?
         end;
 
-    var IPlay play_ = val IPlay(_, &ref!);
-    play = &play_;
+    play = val IPlay(_, &ref!);
 
-    call/dynamic Play_Set_Media(&play_, &media);
+    call/dynamic Play_Set_Media(&play, &media);
 
     do
-        _lp_media_start(&&play_.ref);
-    finalize (play_.ref) with
-        _lp_media_stop(&&play_.ref);
+        _lp_media_start(&&play.ref);
+    finalize (play.ref) with
+        _lp_media_stop(&&play.ref);
     end
 
     loop do
         var _GObject&&  source;
         var _lp_Event&& evt;
-        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == &&play_.ref);
+        (source, evt) = await LP_EVENT until (_LP_MEDIA(source) == &&play.ref);
 
         var _GType type = _G_OBJECT_TYPE(evt);
         if type == _LP_TYPE_EVENT_START then
-            emit play_.ok;
+            emit play.ok;
         else/if type == _LP_TYPE_EVENT_STOP then
             break;
         end

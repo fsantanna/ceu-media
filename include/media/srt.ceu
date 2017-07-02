@@ -6,10 +6,10 @@
 
 code/await Srt (var& IScene scene, var _char&& path, var Region region) -> void
 do
-    var& UV_FS_File file;
-    watching UV_FS_Open(path, _O_RDONLY, 0) -> (&file) do
-        await file.ok;
-        _ceu_dbg_assert(file.fd >= 0);
+    var&? UV_FS_Open f = spawn UV_FS_Open(path, _O_RDONLY, 0);
+    watching f do
+        await f.file.ok;
+        _ceu_dbg_assert(f.file.fd >= 0);
 
         var int   now = 0;
         var usize off = 0;
@@ -21,7 +21,7 @@ do
             // N
             do
                 vector[] byte line;
-                var ssize n = await UV_FS_ReadLine(&file,&line,off);
+                var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
                 if n == 0 then
                     break;
                 end
@@ -38,13 +38,19 @@ do
             // 00:00:01,000 --> 00:00:00,000
             do
                 vector[] byte line;
-                var ssize n = await UV_FS_ReadLine(&file,&line,off);
+                var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
                 _ceu_dbg_assert(n > 0);
                 _ceu_dbg_assert(n == 30);
                 off = off + (n as usize);
 
-                var int fr_h=0, fr_m=0, fr_s=0, fr_ms=0;
-                var int to_h=0, to_m=0, to_s=0, to_ms=0;
+                var int fr_h=0;
+                var int fr_m=0;
+                var int fr_s=0;
+                var int fr_ms=0;
+                var int to_h=0;
+                var int to_m=0;
+                var int to_s=0;
+                var int to_ms=0;
                 var int n = _sscanf(&&line[0], "%d:%d:%d,%d --> %d:%d:%d,%d",
                                 &&fr_h, &&fr_m, &&fr_s, &&fr_ms,
                                 &&to_h, &&to_m, &&to_s, &&to_ms);
@@ -62,7 +68,7 @@ do
             vector[] byte lines;
             loop do
                 vector[] byte line;
-                var ssize n = await UV_FS_ReadLine(&file,&line,off);
+                var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
                 if n == 0 then
                     break;
                 end

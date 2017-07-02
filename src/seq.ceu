@@ -1,24 +1,23 @@
 #include "c.ceu"
 #include "media/media.ceu"
 
-var& IScene scene;
-watching Scene(Size(1080,720),true) -> (&scene)
-do
+var&? Scene s = spawn Scene(Size(1080,720),true);
+watching s do
     var Media.Video m1 = val Media.Video (
                                 [].."resources/misc.avi",
-                                Region(0, 0, 1, scene.size!.width, scene.size!.height),
+                                Region(0, 0, 1, s.scene.size!.width, s.scene.size!.height),
                                 1.0,
                                 1.0,
                          );
     var Media.Video m2 = val Media.Video (
                                 [].."resources/bars.ogg",
-                                Region(0, 0, 1, scene.size!.width, scene.size!.height),
+                                Region(0, 0, 1, s.scene.size!.width, s.scene.size!.height),
                                 1.0,
                                 1.0,
                          );
 
-    await Play(&scene, &m1);
-    await Play(&scene, &m2);
+    await Play(&s.scene, &m1);
+    await Play(&s.scene, &m2);
 end
 
 escape 0;
