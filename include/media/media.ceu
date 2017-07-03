@@ -27,28 +27,28 @@ end
 data Media;
 
 data Media.Text with
-    vector[] byte   text;
-    vector[] byte   font;
-    var      Region region;
-    var      uint   color;
+    var[] byte   text;
+    var[] byte   font;
+    var   Region region;
+    var   uint   color;
 end
 
 data Media.Image with
-    vector[] byte   uri;
-    var      Region region;
-    var      float  alpha;
+    var[] byte   uri;
+    var   Region region;
+    var   float  alpha;
 end
 
 data Media.Audio with
-    vector[] byte  uri;
-    var      float volume;
+    var[] byte  uri;
+    var   float volume;
 end
 
 data Media.Video with
-    vector[] byte   uri;
-    var      Region region;
-    var      float  alpha;
-    var      float  volume;
+    var[] byte   uri;
+    var   Region region;
+    var   float  alpha;
+    var   float  volume;
 end
 
 data IScene with

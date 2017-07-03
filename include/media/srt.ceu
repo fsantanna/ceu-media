@@ -20,7 +20,7 @@ do
 
             // N
             do
-                vector[] byte line;
+                var[] byte line;
                 var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
                 if n == 0 then
                     break;
@@ -37,7 +37,7 @@ do
 
             // 00:00:01,000 --> 00:00:00,000
             do
-                vector[] byte line;
+                var[] byte line;
                 var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
                 _ceu_dbg_assert(n > 0);
                 _ceu_dbg_assert(n == 30);
@@ -65,9 +65,9 @@ do
             end
 
             // subtitles
-            vector[] byte lines;
+            var[] byte lines;
             loop do
-                vector[] byte line;
+                var[] byte line;
                 var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
                 if n == 0 then
                     break;
