@@ -36,19 +36,19 @@ end
 data Media.Image with
     var[] byte   uri;
     var   Region region;
-    var   float  alpha;
+    var   real  alpha;
 end
 
 data Media.Audio with
     var[] byte  uri;
-    var   float volume;
+    var   real volume;
 end
 
 data Media.Video with
     var[] byte   uri;
     var   Region region;
-    var   float  alpha;
-    var   float  volume;
+    var   real  alpha;
+    var   real  volume;
 end
 
 data IScene with
@@ -59,19 +59,19 @@ data IScene with
     event (_char_ptr_ext, bool)  ok_keyed;
 #if 0
     event (_char_ptr_ext) error_event;
-    event (void) quit;
+    event (none) quit;
 #endif
 end
 
 #if 0
   /* Scene functions */
-  function (uint) -> void advance_time;
-  function (void) -> _lp_Scene && getptr;
+  function (uint) -> none advance_time;
+  function (none) -> _lp_Scene && getptr;
 #endif
 
 code/await Scene (var Size? size, var bool auto_advance)
                     -> (var IScene scene)
-                        -> void
+                        -> none
 do
     var int w = 0;
     var int h = 0;
@@ -136,11 +136,11 @@ end
             if type == _LP_TYPE_EVENT_POINTER_CLICK then
                 var _lp_EventPointerClick&& evt_ = _LP_EVENT_POINTER_CLICK(evt);
 
-// TODO: (x,y) sao "float"?
+// TODO: (x,y) sao "real"?
 //  - mudei os eventos internos p/ "int"
 
-                var f64 x = _;
-                var f64 y = _;
+                var r64 x = _;
+                var r64 y = _;
                 var int button = _;
                 var int pressed = _;
                 _g_object_get(
@@ -157,8 +157,8 @@ end
             else/if type == _LP_TYPE_EVENT_POINTER_MOVE then
                 var _lp_EventPointerMove&& evt_ = _LP_EVENT_POINTER_MOVE(evt);
 
-                var f64 x = _;
-                var f64 y = _;
+                var r64 x = _;
+                var r64 y = _;
                 _g_object_get(_G_OBJECT(evt_), "x",&&x, "y",&&y, null);
 
                 emit scene.ok_mouse_moved(x as int, y as int);
@@ -213,7 +213,7 @@ end
   with
     await quit;
   end
-  function (uint value) -> void advance_time do
+  function (uint value) -> none advance_time do
     if auto_advance == false then
       _lp_scene_advance (&&scene!, value);
     end
@@ -222,7 +222,7 @@ end
 end
 
 data IPlay with
-    event void      ok;
+    event none      ok;
     var&  _lp_Media ref;
 end
 
@@ -230,13 +230,13 @@ code/tight/dynamic
 Play_New (var& IScene scene, var&/dynamic Media media) -> _lp_Media&&;
 
 code/tight/dynamic
-Play_Set_Media (var& IPlay play, var&/dynamic Media media) -> void;
+Play_Set_Media (var& IPlay play, var&/dynamic Media media) -> none;
 
 code/tight
-Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> void;
+Play_Set_Char (var& IPlay play, var _char&& name, var _char&& value) -> none;
 
 code/tight
-Play_Set_Int (var& IPlay play, var _char&& name, var int value) -> void;
+Play_Set_Int (var& IPlay play, var _char&& name, var int value) -> none;
 
 code/tight
 Play_Get_Int (var& IPlay play, var _char&& name) -> int;
@@ -245,7 +245,7 @@ Play_Get_Int (var& IPlay play, var _char&& name) -> int;
 
 code/await Play (var& IScene scene, var& Media media)
                     -> (var IPlay play)
-                        -> void
+                        -> none
 do
     var&? _lp_Media ref = &call/dynamic Play_New(&scene, &media)
         finalize (ref) with
@@ -283,19 +283,19 @@ class Player with
 
   /* functions */
   function (Media m, Scene &s) -> Player play;
-  function (Region r) -> void set_region_bounds;
-  function (int, int, int, int) -> void set_bounds;
-  function (char && name, float value) -> void set_property_float;
-  function (char && name, int value) -> void set_property_int;
-  function (char && name, bool value) -> void set_property_bool;
-  function (char && name, char && value) -> void set_property_char;
-  function (char && name) -> float get_property_float;
+  function (Region r) -> none set_region_bounds;
+  function (int, int, int, int) -> none set_bounds;
+  function (char && name, real value) -> none set_property_real;
+  function (char && name, int value) -> none set_property_int;
+  function (char && name, bool value) -> none set_property_bool;
+  function (char && name, char && value) -> none set_property_char;
+  function (char && name) -> real get_property_real;
   function (char && name) -> int get_property_int;
   function (char && name) -> bool get_property_bool;
 
   /* events */
-  event (void) start;
-  event (void) stop;
+  event (none) start;
+  event (none) stop;
 do
   _lp_media_start (&&m!);
   loop do
@@ -320,29 +320,29 @@ do
     this.media = m;
   end
 
-  function (Region r) -> void set_region_bounds do
+  function (Region r) -> none set_region_bounds do
     _g_object_set (&&this.m!, "x", r.x, "y", r.y,
             "width", r.width, "height", r.height, null);
   end
 
-  function (int x, int y, int width, int height) -> void set_bounds do
+  function (int x, int y, int width, int height) -> none set_bounds do
     _g_object_set (&&this.m!, "x", x, "y", y,
             "width", width, "height", height, null);
   end
 
-  function (char&& name, float value) -> void set_property_float do
+  function (char&& name, real value) -> none set_property_real do
     _g_object_set (&&this.m!, name, value, null);
   end
 
-  function (char&& name, int value) -> void set_property_int do
+  function (char&& name, int value) -> none set_property_int do
     _g_object_set (&&this.m!, name, value, null);
   end
 
-  function (char&& name, bool value) -> void set_property_bool do
+  function (char&& name, bool value) -> none set_property_bool do
     _g_object_set (&&this.m!, name, value, null);
   end
 
-  function (char&& name, char&& value) -> void set_property_char do
+  function (char&& name, char&& value) -> none set_property_char do
     _g_object_set (&&this.m!, name, value, null);
   end
 
@@ -352,8 +352,8 @@ do
     return value;
   end
 
-  function (char&& name) -> float get_property_float do
-    var float value = 0.0;
+  function (char&& name) -> real get_property_real do
+    var real value = 0.0;
     _g_object_get (&&this.m!, name, &&value, null);
     return value;
   end

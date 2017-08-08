@@ -4,15 +4,14 @@
 #include "uv/fs.ceu"
 #include "media/media.ceu"
 
-code/await Srt (var& IScene scene, var _char&& path, var Region region) -> void
+code/await Srt (var& IScene scene, var _char&& path, var Region region) -> none
 do
-    var&? UV_FS_Open f = spawn UV_FS_Open(path, _O_RDONLY, 0);
+    var&? UV_FS_Open f = spawn UV_FS_Open(path,_,_,_);
     watching f do
         await f.file.ok;
-        _ceu_dbg_assert(f.file.fd >= 0);
+        _ceu_dbg_assert(f.file.handle >= 0);
 
-        var int   now = 0;
-        var usize off = 0;
+        var int now = 0;
         var int i;
         loop i do
             var int fr = 0;
@@ -21,12 +20,12 @@ do
             // N
             do
                 var[] byte line;
-                var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
+                var ssize n = await UV_FS_Read_Line(&f.file,&line,_);
                 if n == 0 then
                     break;
                 end
                 _ceu_dbg_assert(n > 0);
-                off = off + (n as usize);
+                line = line .. [{'\0'}];
 
                 var int cur = _;
                 var ssize n = _sscanf(&&line[0], "%d", &&cur);
@@ -38,10 +37,10 @@ do
             // 00:00:01,000 --> 00:00:00,000
             do
                 var[] byte line;
-                var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
+                var ssize n = await UV_FS_Read_Line(&f.file,&line,_);
                 _ceu_dbg_assert(n > 0);
                 _ceu_dbg_assert(n == 30);
-                off = off + (n as usize);
+                line = line .. [{'\0'}];
 
                 var int fr_h=0;
                 var int fr_m=0;
@@ -65,19 +64,20 @@ do
             end
 
             // subtitles
-            var[] byte lines;
+            var[] byte lines = [{'\0'}];
             loop do
                 var[] byte line;
-                var ssize n = await UV_FS_ReadLine(&f.file,&line,off);
+                var ssize n = await UV_FS_Read_Line(&f.file,&line,_);
                 if n == 0 then
                     break;
                 end
                 _ceu_dbg_assert(n > 0);
-                off = off + (n as usize);
 
                 if $line == 0 then
                     break;
                 end
+                line = line .. [{'\0'}];
+                $lines = $lines - 1;
                 lines = lines..[{'\n'}]..line;
                 _printf("%s\n", &&line[0]);
             end
